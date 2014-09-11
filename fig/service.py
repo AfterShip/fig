@@ -240,6 +240,12 @@ class Service(object):
         options = dict(self.options, **override_options)
         ports = dict(split_port(port) for port in options.get('ports') or [])
 
+        ##### HACK >>> #################################################################
+        print 'PORTS BEFORE HACK:', ports
+        ports = dict((port, str(int(port)+container.number-1)) for port in ports.keys())
+        print 'PORTS AFTER HACK: ', ports
+        ##### <<< HACK #################################################################
+
         volume_bindings = dict(
             build_volume_binding(parse_volume_spec(volume))
             for volume in options.get('volumes') or []
