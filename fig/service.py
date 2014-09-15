@@ -128,6 +128,7 @@ class Service(object):
         # Create enough containers
         containers = self.containers(stopped=True)
         while len(containers) < desired_num:
+            self.build()  # HACK
             containers.append(self.create_container())
 
         running_containers = []
