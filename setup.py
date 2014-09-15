@@ -33,6 +33,7 @@ install_requires = [
     'dockerpty >= 0.2.3, < 0.3',
     'docker-py >= 0.3.2, < 0.6',
     'six >= 1.3.0, < 2',
+    'mako == 1.0.0'
 ]
 
 tests_require = [
