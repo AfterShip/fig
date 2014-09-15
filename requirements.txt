@@ -6,3 +6,4 @@ requests==2.2.1
 six==1.7.3
 texttable==0.8.1
 websocket-client==0.11.0
+mako==1.0.0

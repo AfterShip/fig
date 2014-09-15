@@ -375,13 +375,46 @@ class Service(object):
     def build(self, no_cache=False):
         log.info('Building %s...' % self.name)
 
+        ##### HACK >>> #################################################################
+        import tempfile, shutil
+        from mako.template import Template
+
+        number = self.next_container_number()
+        template_prefix = '.template'
+        template_dir = str(self.options['build'])
+        temp_dir = tempfile.mkdtemp(dir='./build')
+        
+        build_dir = '%s/%s' % (temp_dir, self.name)
+        print 'DEBUG:', 'build_dir', build_dir
+        
+        shutil.copytree(template_dir, build_dir)
+        files = os.listdir(build_dir)
+        print 'DEBUG:', 'files', files
+        
+        template_files = [s for s in files if template_prefix in s]
+        print 'DEBUG:', 'template_files', template_files
+        
+        for template in template_files:
+            template_path = '%s/%s' % (build_dir, template)
+            print 'DEBUG:', 'template_path', template_path
+
+            file_path = template_path[:template_path.find(template_prefix)]
+            print 'DEBUG:', 'file_path', file_path
+            
+            file_content = Template(filename=template_path).render(number=number)
+            open(file_path, 'w').write(file_content)
+
         build_output = self.client.build(
-            self.options['build'],
+            build_dir,
+            # self.options['build'],
             tag=self._build_tag_name(),
             stream=True,
             rm=True,
             nocache=no_cache,
         )
+
+        shutil.rmtree(temp_dir)
+        ##### <<< HACK #################################################################
 
         try:
             all_events = stream_output(build_output, sys.stdout)
