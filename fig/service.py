@@ -243,8 +243,17 @@ class Service(object):
 
         ##### HACK >>> #################################################################
         print 'PORTS BEFORE HACK:', ports
-        ports = dict((port, str(int(port)+container.number-1)) for port in ports.keys())
-        print 'PORTS AFTER HACK: ', ports
+        ports_hacked = dict()
+        for internal in ports.keys():
+            external = ports[internal]
+            print 'internal', internal
+            print 'external', external
+            if not external:
+                external = unicode(int(internal)+container.number-1)
+            else:
+                external = unicode(int(external)+container.number-1)
+            ports_hacked[internal] = external
+        print 'PORTS AFTER HACK: ', ports_hacked
         ##### <<< HACK #################################################################
 
         volume_bindings = dict(
@@ -258,7 +267,7 @@ class Service(object):
 
         container.start(
             links=self._get_links(link_to_self=options.get('one_off', False)),
-            port_bindings=ports,
+            port_bindings=ports_hacked,  # HACK
             binds=volume_bindings,
             volumes_from=self._get_volumes_from(intermediate_container),
             privileged=privileged,
@@ -445,9 +454,9 @@ class Service(object):
         return '%s_%s' % (self.project, self.name)
 
     def can_be_scaled(self):
-        for port in self.options.get('ports', []):
-            if ':' in str(port):
-                return False
+        # for port in self.options.get('ports', []):
+        #     if ':' in str(port):
+        #         return False
         return True
 
 
