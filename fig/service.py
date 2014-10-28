@@ -261,6 +261,12 @@ class Service(object):
             for volume in options.get('volumes') or []
             if ':' in volume)
 
+        if container:
+            host_path = os.path.abspath('./build/containers/%s_%s' % (self.name, container.number))
+            if os.path.exists(host_path):
+                print 'DEBUG: mount', host_path, 'to /container_build', 
+                volume_bindings[host_path] = {'bind': '/container_build', 'ro': False}
+
         privileged = options.get('privileged', False)
         net = options.get('net', 'bridge')
         dns = options.get('dns', None)
@@ -392,10 +398,13 @@ class Service(object):
         number = self.next_container_number()
         template_prefix = '.template'
         template_dir = str(self.options['build'])
-        temp_dir = tempfile.mkdtemp(dir='./build')
+        # temp_dir = tempfile.mkdtemp(dir='./build')
         
-        build_dir = '%s/%s' % (temp_dir, self.name)
+        # build_dir = '%s/%s' % (temp_dir, self.name)
+        build_dir = './build/containers/%s_%s' % (self.name, number)
         print 'DEBUG:', 'build_dir', build_dir
+        if os.path.exists(build_dir):
+            shutil.rmtree(build_dir)
         
         shutil.copytree(template_dir, build_dir)
         files = os.listdir(build_dir)
@@ -423,7 +432,7 @@ class Service(object):
             nocache=no_cache,
         )
 
-        shutil.rmtree(temp_dir)
+        # shutil.rmtree(temp_dir)
         ##### <<< HACK #################################################################
 
         try:
